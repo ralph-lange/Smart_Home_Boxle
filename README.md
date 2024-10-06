@@ -2,10 +2,10 @@
 
 The Smart Home Böxle is a pretty little wooden box that combines a classic analogue ammeter with an e-Ink display to visualize home automation data. (‘Böxle’ is German, Swabian to be precise, and means ‘little box’.)
 
-<img src="doc/finished_box_front_view.jpg" width="47%">
-<img src="doc/finished_box_wide_view.jpg" width="47%">
-<img src="doc/finished_box_angular_view.jpg" width="47%">
-<img src="doc/finished_box_back_view.jpg" width="47%">
+<img src="doc/finished_box_front_view.jpg" width="40%">
+<img src="doc/finished_box_wide_view.jpg" width="40%">
+<img src="doc/finished_box_angular_view.jpg" width="40%">
+<img src="doc/finished_box_back_view.jpg" width="40%">
 
 ## Parts list
 
