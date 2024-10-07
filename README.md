@@ -70,6 +70,8 @@ The above 2D drawings can be found in scale 1:1 in [cad/2D_drawings_of_front_pan
 
 The file [test/analog_out_sinus/analog_out_sinus.ino](test/analog_out_sinus/analog_out_sinus.ino) provides a small test program that outputs a 0.25 Hz sinus between 0 and 3.3 V on GPIO 25. This may be used to test an analog ammeter or voltmeter as depicted below.
 
-![](doc/analog_ammeter_sinus.gif)
+<p align="center">
+  <img width="75%" src="doc/analog_ammeter_sinus.gif">
+</p>
 
 In the video, a 100&hairsp;µA ammeter is used with a 33&hairsp;kΩ at GPIO 25.
