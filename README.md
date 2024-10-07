@@ -2,10 +2,7 @@
 
 The Smart Home Böxle is a pretty little wooden box that combines a classic analogue ammeter with an e-Ink display to visualize home automation data. (‘Böxle’ is German, Swabian to be precise, and means ‘little box’.)
 
-<img src="doc/finished_box_front_view.jpg" width="40%">
-<img src="doc/finished_box_wide_view.jpg" width="40%">
-<img src="doc/finished_box_angular_view.jpg" width="40%">
-<img src="doc/finished_box_back_view.jpg" width="40%">
+![](doc/finished_box_four_views.png)
 
 ## Parts list
 
@@ -57,7 +54,7 @@ In addition to the ESP32, I mounted a small circuit board with a pin strip for g
 
 For power supply and flashing, I cut off a four-wire micro-USB cable and soldered it to a four-contact USB-C socket (see photo below right). The socket is attached using a small wooden block.
 
-![](doc/ePaper_SPI_wiring_and_grounding_pin_strip_and_USB-C_to_micro-USB.jpg)
+![](doc/ePaper_SPI_wiring_and_grounding_pin_strip_and_USB-C_to_micro-USB.png)
 
 Mount/glue a small black frame around the cutout of the e-paper display. An STL file for 3D printing such a frame can is stored at [cad/black_frame_for_e-paper_display.stl](cad/black_frame_for_e-paper_display.stl).
 
