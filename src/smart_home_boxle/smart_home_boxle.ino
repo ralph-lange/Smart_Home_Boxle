@@ -10,9 +10,11 @@
 // - Implement calibration function using the four push buttons.
 
 
+#include <cstdint>
+
 #include <vector>
 
-#include <WiFi.h>  // Platform 'esp32' by Espressif
+#include <WiFi.h>  // Platform 'esp32' by Espressif (here V2.0.11)
 #include <time.h>
 #include <HTTPClient.h>
 
@@ -59,13 +61,14 @@ int zoom = 3;
 bool isNtpInitialized = false;
 
 
-#define STEPPER_AS_AMMETER 1
-#ifdef STEPPER_AS_AMMETER
+#define HAS_STEPPER_AS_AMMETER false
+#if HAS_STEPPER_AS_AMMETER
   #include <Servo.h>  // Library 'ServoESP32' by Jaroslav Paral (here V1.0.2).
   Servo ammeterServo;
 #endif
 
 
+/// Struct for a single data item from the photovoltaic system. 
 struct PVSingleData {
   double age = 0.0;
   float pAC = 0.0f;
@@ -79,25 +82,27 @@ struct PVSingleData {
 PVSingleData newestData; 
 
 
-void waitUntilWifiConnectedOrTimeout(long timeout) {
-  assert(timeout >= 5000);
+/// Waits up to the given number of milliseconds for the WiFi to connect.
+void waitUntilWiFiConnectedOrTimeout(long timeout_ms) {
+  assert(timeout_ms >= 5000);
 
-  const int WAIT_STEP_TIME = 100;
-  long maxSteps = timeout / WAIT_STEP_TIME;
+  const int WAIT_STEP_TIME_MS = 100;
+  long maxSteps = timeout_ms / WAIT_STEP_TIME_MS;
   for (long step = 0; step < maxSteps && WiFi.status() != WL_CONNECTED; ++step) {
-    delay(WAIT_STEP_TIME);
+    delay(WAIT_STEP_TIME_MS);
   }  
 }
 
 
-bool tryConnectWiFi(size_t tries) {
+/// Tries to connect to WiFi the given number of times.
+bool tryConnectWiFi(size_t attemps) {
   size_t index = 0;
   Serial.print(F("Connecting to WiFi ."));
-  while(WiFi.status() != WL_CONNECTED && index < tries) {
+  while(WiFi.status() != WL_CONNECTED && index < attemps) {
     index++;
     WiFi.begin(WIFI_SSID, WIFI_PASSWORD);
     Serial.print(".");
-    waitUntilWifiConnectedOrTimeout(5000);
+    waitUntilWiFiConnectedOrTimeout(5000);
   } 
   Serial.println("");
   
@@ -111,7 +116,9 @@ bool tryConnectWiFi(size_t tries) {
 }
 
 
-String tryHTTPRequest(const String& url, size_t tries) {
+/// Sends the given HTTP request and returns the response - or an empty
+/// string if the request failed.
+String tryHTTPRequest(const String& url, size_t attempts) {
   Serial.print(F("Sending HTTP request to "));
   Serial.print(url);
   Serial.println(".");
@@ -126,7 +133,7 @@ String tryHTTPRequest(const String& url, size_t tries) {
     response = http.GET();
     content = http.getString();
     http.end();
-  } while(response != 200 && index < tries);
+  } while(response != 200 && index < attempts);
   
   if (response != 200) {
     Serial.print(F("Problem with REST query: HTTP error code is "));
@@ -139,6 +146,8 @@ String tryHTTPRequest(const String& url, size_t tries) {
 }
 
 
+/// Queries the newest/latest data from the ThingSpeak channel. The argument
+/// currentTime is used to determine the relative age of the data.
 void queryNewestData(tm& currentTime) {
   String url = "https://api.thingspeak.com/channels/" + String(THINGSPEAK_CHANNEL) + "/feeds.json?results=1";
   String content = tryHTTPRequest(url, 5);
@@ -169,6 +178,9 @@ void queryNewestData(tm& currentTime) {
 }
 
 
+/// Queries a timeseries/curve for the given field from the ThingSpeak channel.
+/// The currentTime is used to determine the relative age of each data point.
+/// The argument zoom determines the temporal resolution.
 std::vector<PlotPoint> queryCurveGeneric(tm& currentTime, int zoom, int field) {
   String fieldAsString(field);
   String url = "https://api.thingspeak.com/channels/" + String(THINGSPEAK_CHANNEL) + "/fields/" + fieldAsString + ".json?median=" + String(ZOOM_TO_RESOLUTION_MINUTES[zoom]) + "&minutes=" + String(ZOOM_TO_RANGE_MINUTES[zoom]);
@@ -195,21 +207,32 @@ std::vector<PlotPoint> queryCurveGeneric(tm& currentTime, int zoom, int field) {
 }
 
 
+/// Queries the P_AC timeseries/curve from the ThingSpeak channel. The
+/// currentTime is used to determine the relative age of each data point.
+/// The argument zoom determines the temporal resolution.
 std::vector<PlotPoint> queryPACCurve(tm& currentTime, int zoom) {
   return queryCurveGeneric(currentTime, zoom, 3);
 }
 
 
+/// Queries the frequency timeseries/curve from the ThingSpeak channel. The
+/// currentTime is used to determine the relative age of each data point.
+/// The argument zoom determines the temporal resolution.
 std::vector<PlotPoint> queryFrequencyCurve(tm& currentTime, int zoom) {
   return queryCurveGeneric(currentTime, zoom, 2);
 }
 
 
+/// Queries the U_AC timeseries/curve from the ThingSpeak channel. The
+/// currentTime is used to determine the relative age of each data point.
+/// The argument zoom determines the temporal resolution.
 std::vector<PlotPoint> queryUACCurve(tm& currentTime, int zoom) {
   return queryCurveGeneric(currentTime, zoom, 1);
 }
 
 
+/// The main function (static schedule) for all long-running functions
+/// such as querying ThingSpeak and updating the e-Ink display.
 void longRunningFunctionsMain(void*) {
   WiFiClient client;
   WiFi.mode(WIFI_STA);
@@ -229,21 +252,9 @@ void longRunningFunctionsMain(void*) {
       } else {
         Serial.println(F("Could not initialize NTP!"));
       }
-    // } else if (millis() > nextZoomRedrawMillis) {
-    //   redrawZoomLevel(zoom);
-    //   nextZoomRedrawMillis = millis() + 3600 * 1000;
     } else if (millis() > nextPlotRedrawMillis) {
       queryDataAndRedraw(zoom);
       nextPlotRedrawMillis = millis() + 180 * 1000;  // Normally do not redraw faster than 3 minutes.
-    // } else if (zoom != encoder.getPosition()) {
-    //   int newZoom = static_cast<int>(std::max(0L, std::min(static_cast<long>(MAX_ZOOM), encoder.getPosition())));
-    //   if (newZoom != zoom) {
-    //     zoom = newZoom;
-    //     encoder.setPosition(zoom);
-    //     nextPlotRedrawMillis = millis() + 3000;
-    //     // nextZoomRedrawMillis = millis() + 50;
-    //     Serial.println("New zoom is " + String(zoom) + ".");
-    //   }
     }
     delay(10);
   }
@@ -252,6 +263,9 @@ void longRunningFunctionsMain(void*) {
 }
 
 
+/// The main function (static schedule) for all short-running functions
+/// such as determining the state of the push buttons and updating the
+/// analogy display.
 void shortRunningFunctionsMain() {
   unsigned long nextRegularAmmeterUpdateMillis = millis();
   int lastAnalogDisplayValue = -1;
@@ -316,6 +330,7 @@ void shortRunningFunctionsMain() {
 }
 
 
+/// The start-up function called by the ESP32 platform.
 void setup() {
   Serial.begin(115200);
 
@@ -337,31 +352,16 @@ void setup() {
 }
 
 
+/// The main function called by the ESP32 platform. It is splitted into two
+/// threads for long-running and short-running functions.
 void loop() {
   xTaskCreatePinnedToCore(longRunningFunctionsMain, "longRunningFunctionsTask", 25000, NULL, 0, &longRunningFunctionsTask, 0);
   shortRunningFunctionsMain();
 }
 
 
-// void redrawZoomLevel(int zoom) {
-//   Serial.print("Redrawing zoom label area with zoom level ");
-//   Serial.print(zoom);
-//   Serial.println(".");
-  
-//   displayPtr->setPartialWindow(20, 350, 80, 30);
-//   displayPtr->firstPage();
-
-//   do {
-//     displayPtr->fillScreen(GxEPD_WHITE);
-//     displayPtr->setCursor(120, 80);
-//     displayPtr->setFont(&FreeSans9pt7b);
-//     displayPtr->setCursor(20, 370);
-//     String zoomText = "Zoom: " + String(zoom);
-//     displayPtr->print(zoomText.c_str());
-//   } while(displayPtr->nextPage());
-// }
-
-
+/// Converts the given relative time (negative number of seconds) into a
+/// string representation in hours or even days for the x-axes of the plots. 
 String relativeHoursOrDayLabelFromSeconds(int seconds) {
   assert(seconds <= 0);
 
@@ -382,6 +382,8 @@ String relativeHoursOrDayLabelFromSeconds(int seconds) {
 }
 
 
+/// Queries all data from the ThingSpeak channel and updates the whole
+/// e-Ink display accordingly.
 void queryDataAndRedraw(int zoom) {
   struct tm currentTime;
   if (!getLocalTime(&currentTime, 10000)) {
@@ -596,6 +598,7 @@ void queryDataAndRedraw(int zoom) {
 }
 
 
+/// Returns the width of the given text in pixels on the e-Ink display.
 uint16_t display_getTextWidth(String text) {
   int16_t x, y;
   uint16_t width, height;

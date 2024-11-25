@@ -11,20 +11,28 @@
 #include <vector>
 
 
+/// Represents a tick on an axis with value and label.
 struct PlotTick {
   double value;
   String label;
 };
 
 
+/// Represents a point in the plot area.
 struct PlotPoint {
   double x;
   double y;
 };
 
 
+/// Generic class to render a 2D plot with linear axes. The class is generic
+/// in the sense that the actual drawing functions are passed by function
+/// pointers or lambda expressions, i.e., it may be used with any type of
+/// 2D screen.
 class PlotUtility {
  public:
+  /// Ctor expecting position on the screen (posX, posY, width, height) and
+  /// ranges of the x and y axes.
   PlotUtility(int posX, int posY, int width, int height, double minX, double maxX, double minY, double maxY)
   : posX(posX), posY(posY), width(width), height(height), minX(minX), maxX(maxX), minY(minY), maxY(maxY)
   {
@@ -34,6 +42,8 @@ class PlotUtility {
     assert(minY < maxY);
   }
 
+
+  /// Sets the ticks (string label at given value) on the x axis.
   void setXTicks(const std::vector<PlotTick>& ticks) {
     for (const auto& tick : ticks) {
       assert(minX <= tick.value && tick.value <= maxX);
@@ -42,6 +52,8 @@ class PlotUtility {
     xTicks = ticks;
   }
 
+
+  /// Sets the ticks (string label at given value) on the y axis.
   void setYTicks(const std::vector<PlotTick>& ticks) {
     for (const auto& tick : ticks) {
       assert(minY <= tick.value && tick.value <= maxY);
@@ -50,6 +62,8 @@ class PlotUtility {
     yTicks = ticks;
   }
 
+
+  /// Draws the x axis using the given function to draw a line.
   void drawXAxis(std::function<void(int,int,int,int)> drawLineFunc) {
     int x0 = posX;
     int y0 = posY + height - 1;
@@ -58,6 +72,8 @@ class PlotUtility {
     drawLineFunc(x0, y0, x1, y1);
   }
 
+
+  /// Draws the y axis using the given function to draw a line.
   void drawYAxis(std::function<void(int,int,int,int)> drawLineFunc) {
     int x0 = posX;
     int y0 = posY + height - 1;
@@ -66,14 +82,23 @@ class PlotUtility {
     drawLineFunc(x0, y0, x1, y1);
   }
 
+
+  /// Computes the x pixel value for the given x value in the plot range.
   int getXPixelForXValue(double x) {
     return static_cast<int>(posX + (width - 1) * (x - minX) / (maxX - minX) + 0.5);
   }
 
+
+  /// Computes the y pixel value for the given y value in the plot range.
   int getYPixelForYValue(double y) {
     return static_cast<int>(posY + (height - 1) * (maxY - y) / (maxY - minY) + 0.5);
   }
 
+
+  /// Draws the x axis ticks using the given function to draw tick label at
+  /// x0,y0 and the relative value (between 0 and 1) along the x axis. The
+  /// relative value can for example be used to adjust between left, center,
+  /// and right alignment.
   void drawXTicks(std::function<void(int,int,double,String)> drawTickFunc) {
     for (const PlotTick& tick : xTicks) {
       int x = getXPixelForXValue(tick.value);
@@ -83,6 +108,11 @@ class PlotUtility {
     }
   }
 
+
+  /// Draws the y axis ticks using the given function to draw tick label at
+  /// x0,y0 and the relative value (between 0 and 1) along the y axis. The
+  /// relative value can for example be used to adjust between top, middle,
+  /// and bottom alignment.
   void drawYTicks(std::function<void(int,int,double,String)> drawTickFunc) {
     for (const PlotTick& tick : yTicks) {
       int x = posX;
@@ -92,6 +122,9 @@ class PlotUtility {
     }
   }
 
+
+  /// Draws the given points in the plot area using the given function
+  /// to draw a point at x0,y0.
   void drawPoints(const std::vector<PlotPoint>& points, std::function<void(int,int,PlotPoint)> drawPointFunc) {
     for (const PlotPoint& point : points) {
       int x = getXPixelForXValue(point.x);
@@ -100,6 +133,9 @@ class PlotUtility {
     }
   }
 
+
+  /// Draws lines between consecutive points of the given vector of points
+  /// using the given drawing functions.
   void drawLinesBetweenPoints(const std::vector<PlotPoint>& points, std::function<void(int,int,int,int,PlotPoint,PlotPoint)> drawLineFunc) {
     PlotPoint prevPoint;
     int prevX = 0;

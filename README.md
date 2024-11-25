@@ -66,9 +66,17 @@ The last step is the back cover, which is placed in the body. Drill a finger-siz
 
 The above 2D drawings can be found in scale 1:1 in [cad/2D_drawings_of_front_panel_and_body.pdf](cad/2D_drawings_of_front_panel_and_body.pdf).
 
-## Test scripts
+## Software
 
-The file [test/analog_out_sinus/analog_out_sinus.ino](test/analog_out_sinus/analog_out_sinus.ino) provides a small test program that outputs a 0.25 Hz sinus between 0 and 3.3 V on GPIO 25. This may be used to test an analog ammeter or voltmeter as depicted below.
+The software was implemented using the Arduino IDE and the Arduino-ESP platform. The main software can be found in [src/smart_home_boxle/smart_home_boxle.ino](src/smart_home_boxle/smart_home_boxle.ino). All dependencies are documented directly at the beginning with the include directives.
+
+The file [src/smart_home_boxle/plot_utility.h](src/smart_home_boxle/plot_utility.h) contains a small utility class for 2D plots.
+
+Put your secrets `WIFI_SSID`, `WIFI_PASSWORD`, and `THINGSPEAK_CHANNEL` in a file named screts.h in the same folder. This file is excluded from version control, cf. [.gitignore](.gitignore).
+
+## Tools
+
+The file [tools/analog_out_sinus/analog_out_sinus.ino](tools/analog_out_sinus/analog_out_sinus.ino) provides a small tooling program that outputs a 0.25 Hz sinus between 0 and 3.3 V on GPIO 25. This may be used to test an analog ammeter or voltmeter as depicted below.
 
 <p align="center">
   <img width="75%" src="doc/analog_ammeter_sinus.gif">
