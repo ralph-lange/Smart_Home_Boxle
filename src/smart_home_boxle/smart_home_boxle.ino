@@ -63,7 +63,7 @@ bool isNtpInitialized = false;
 
 #define HAS_STEPPER_AS_AMMETER false
 #if HAS_STEPPER_AS_AMMETER
-  #include <Servo.h>  // Library 'ServoESP32' by Jaroslav Paral (here V1.0.2).
+  #include <ESP32Servo.h>  // Library 'ESP32Servo' V3.0.6 by Kevin Harrington, John K. Bennett.
   Servo ammeterServo;
 #endif
 
