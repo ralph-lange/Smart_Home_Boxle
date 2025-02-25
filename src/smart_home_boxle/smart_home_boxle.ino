@@ -273,16 +273,16 @@ void shortRunningFunctionsMain() {
     int analogDisplayValue = 0;
 
     if (digitalRead(PUSH_BUTTON_A_PIN) == LOW) {
-      Serial.println("Bush button A (very left) is pressed.");
+      Serial.println("Push button A (very left) is pressed.");
     }
     if (digitalRead(PUSH_BUTTON_B_PIN) == LOW) {
-      Serial.println("Bush button B (middle left) is pressed.");
+      Serial.println("Push button B (middle left) is pressed.");
     }
     if (digitalRead(PUSH_BUTTON_C_PIN) == LOW) {
-      Serial.println("Bush button C (middle right) is pressed.");
+      Serial.println("Push button C (middle right) is pressed.");
     }
     if (digitalRead(PUSH_BUTTON_D_PIN) == LOW) {
-      Serial.println("Bush button D (very right) is pressed.");
+      Serial.println("Push button D (very right) is pressed.");
     }
 
     if (digitalRead(PUSH_BUTTON_A_PIN) == LOW) {
