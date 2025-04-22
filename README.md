@@ -66,6 +66,25 @@ The last step is the back cover, which is placed in the body. Drill a finger-siz
 
 The above 2D drawings can be found in scale 1:1 in [cad/2D_drawings_of_front_panel_and_body.pdf](cad/2D_drawings_of_front_panel_and_body.pdf).
 
+## Wiring
+
+Wire the e-paper display to the ESP32 as follows:
+
+| E-paper Display | ESP32 Dev Kit C |
+| :-------------: | :-------------: |
+| VSYS+           | 5V              |
+| GND             | GND             |
+| &ast;DC         | GPIO 25         |
+| &ast;CS         | GPIO 14         |
+| &ast;SCK        | GPIO 18         |
+| &ast;DIN        | GPIO 23         |
+| &ast;RST        | GPIO 33         |
+| &ast;BUSY       | GPIO 12         |
+
+The plus terminal of the ammeter is connected to GPIO 26.
+
+The four pushbutton switches are each connected to GND and to GPIO 17 respectively 16, 2, or 15.
+
 ## Software
 
 The software was implemented using the Arduino IDE and the Arduino-ESP platform. The main software can be found in [src/smart_home_boxle/smart_home_boxle.ino](src/smart_home_boxle/smart_home_boxle.ino). All dependencies are documented directly at the beginning with the include directives.
