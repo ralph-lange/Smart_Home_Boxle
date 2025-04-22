@@ -1,4 +1,4 @@
-// Copyright (c) 2024 Ralph Lange
+// Copyright (c) 2024-2025 Ralph Lange
 // All rights reserved.
 //
 // This source code is licensed under the BSD 3-Clause license found in the
